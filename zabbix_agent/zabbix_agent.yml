@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars_files:
-    - vars/ubuntu20_04.yml
+    - vars/ubuntu18_04.yml
   gather_facts: no
   tasks:
       
