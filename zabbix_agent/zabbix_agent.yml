@@ -32,24 +32,32 @@
       - name: create psk file
         become: yes
         command: sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
+        tags:
+          - install        
 
       - name: Stop service zabbix-agent
         become: yes
         service:
             name: zabbix-agent
             state: stopped
+        tags:
+          - install
 
       - name: Remove zabbix config file
         become: yes
         file:
             path: /etc/zabbix/zabbix_agentd.conf
             state: absent
+        tags:
+          - install
 
       - name: Create new zabbix config file from template
         become: yes
         template:
             src: "templates/zabbix_agentd.conf"
             dest: "/etc/zabbix/zabbix_agentd.conf"
+        tags:
+          - install
       
 #      - name: create dir zabbix_agentd.conf.d
 #        become: yes
@@ -63,3 +71,17 @@
         service:
             name: zabbix-agent
             state: started
+        tags:
+          - install
+         
+      - name: Run command to show psk key
+        command: cat /etc/zabbix/zabbix_agentd.psk
+        register: command_result
+        tags:
+          - psk
+      
+      - name: Show Value psk key
+        debug:
+          var: command_result.stdout
+        tags:
+          - psk 
