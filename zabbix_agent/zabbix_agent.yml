@@ -1,13 +1,13 @@
 ---
 - hosts: all
   vars_files:
-    - vars/ubuntu18_04.yml
+    - vars/repo_url.yml
   gather_facts: no
   tasks:
       
       - name: Download zabbix repo package
         get_url:
-            url: "{{ zabbix_repo_url}}"
+            url: "{{url_18_04}}"
             dest: /tmp/zabbix.deb
 
       - name: Install zabbix repo
