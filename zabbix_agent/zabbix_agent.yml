@@ -9,12 +9,16 @@
         get_url:
             url: "{{url_18_04}}"
             dest: /tmp/zabbix.deb
+        tags:
+          - install        
 
       - name: Install zabbix repo
         become: yes
         apt:
             deb: /tmp/zabbix.deb
             state: present
+        tags:
+          - install
 
       - name: Install zabbix agent
         become: yes
@@ -22,6 +26,12 @@
             name: zabbix-agent
             state: present
             update_cache: yes
+        tags:
+          - install
+      
+      - name: create psk file
+        become: yes
+        command: sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
 
       - name: Stop service zabbix-agent
         become: yes
@@ -40,7 +50,14 @@
         template:
             src: "templates/zabbix_agentd.conf"
             dest: "/etc/zabbix/zabbix_agentd.conf"
-
+      
+#      - name: create dir zabbix_agentd.conf.d
+#        become: yes
+#        file:
+#         path: /etc/zabbix/zabbix_agentd.conf.d
+#         state: directory
+  
+                    
       - name: Start service zabbix-agent
         become: yes
         service:
