@@ -31,7 +31,7 @@
       
       - name: create psk file
         become: yes
-        command: sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
+        command: openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk
         tags:
           - install        
 
