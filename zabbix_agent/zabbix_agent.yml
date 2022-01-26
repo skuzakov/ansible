@@ -1,0 +1,111 @@
+---
+- hosts: all
+  vars_files:
+    - vars/repo_url.yml
+  gather_facts: no
+  tasks:
+
+      - name: uninstall previous version
+        become: yes
+        apt:
+            name: zabbix-agent
+            state: absent
+            autoremove: yes
+            purge: yes
+        tags:
+          - uninstall
+        
+      
+      - name: Download zabbix repo package
+        become: yes
+        get_url:
+            url: "{{url_18_04}}"
+            dest: /tmp/zabbix.deb
+        tags:
+          - install        
+
+      - name: Install zabbix repo if not later version
+        become: yes
+        apt:
+            deb: /tmp/zabbix.deb
+            state: present
+#        register: error
+#        failed_when: '"A later version is already installed" not in error.msg' 
+        tags:
+          - install
+
+      - name: Install zabbix agent
+        become: yes
+        apt:
+            name: zabbix-agent
+            state: present
+            update_cache: yes
+        tags:
+          - install
+      
+      - name: create psk file
+        become: yes
+        command: sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
+        tags:
+          - psk        
+
+      - name: Stop service zabbix-agent
+        become: yes
+        service:
+            name: zabbix-agent
+            state: stopped
+        tags:
+          - install
+
+      - name: Remove zabbix config file
+        become: yes
+        file:
+            path: /etc/zabbix/zabbix_agentd.conf
+            state: absent
+        tags:
+          - install
+
+      - name: Create new zabbix config file from template
+        become: yes
+        template:
+            src: "templates/zabbix_agentd.conf"
+            dest: "/etc/zabbix/zabbix_agentd.conf"
+        tags:
+          - install
+      
+      - name: create dir zabbix_agentd.conf.d
+        become: yes
+        file:
+         path: /etc/zabbix/zabbix_agentd.conf.d
+         state: directory
+  
+                    
+      - name: Start service zabbix-agent
+        become: yes
+        service:
+            name: zabbix-agent
+            state: started
+        tags:
+          - install
+      
+      - name: delete temp file
+        become: yes
+        file:   
+          path: /tmp/zabbix.deb
+          state: absent
+
+      - name: Run command to show psk key
+        command: cat /etc/zabbix/zabbix_agentd.psk
+        register: command_result
+        tags:
+          - psk
+      
+      - name: Show Value psk key
+        debug:
+          var: command_result.stdout
+        tags:
+          - psk 
+ 
+      - name: enable autorun
+        become: yes
+        command: sh -c "systemctl enable zabbix-agent.service"
