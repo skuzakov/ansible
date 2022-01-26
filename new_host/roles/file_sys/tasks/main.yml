@@ -16,7 +16,7 @@
       args:
         warn: no
     
-    block:
+    - block:
       - name: "Checking folders"
         stat:
          path: "{{item}}"
@@ -25,15 +25,15 @@
         - ["/mnt/storage","/mnt/storage/services","/mnt/storage/logs","/mnt/storage/db","/mnt/storage/docker"]
       - name: "Creating multiple folders without disturbing previous permissions"
         become: yes 
-         file:
-         path: "{{item.item}}"
-         state: directory
-         mode: 0755
-         group: root
-         owner: root
-         when: item.stat.exists == false
-         loop:
-          - "{{folder_stats.results}}"
+        file:
+          path: "{{item.item}}"
+          state: directory
+          mode: 0755
+          group: root
+          owner: root
+          when: item.stat.exists == false
+          loop:
+           - "{{folder_stats.results}}"
 
     - name: Create deployer user
       become: yes

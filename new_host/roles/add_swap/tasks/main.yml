@@ -64,3 +64,15 @@
   tags:
     - swap.set.swappiness
 
+- name: show 
+  become: yes
+  command: swapon --show
+  register: command_result
+  tags:
+    - swap.show.swap
+
+- name: show results
+  debug:
+    var: command_result.stdout
+  tags:
+    - swap.show.swap

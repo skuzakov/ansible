@@ -6,18 +6,44 @@
     url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64"
     dest: /usr/local/bin/gitlab-runner
     mode: 0744
+  tags:
+    - get.package.runner
+
+- name: Check if runner exists
+  become: yes
+  stat:
+    path: "/etc/systemd/system/gitlab-runner.service" 
+  register: runner_check
+  tags:
+    - runner.check
 
 - name: install runner
   become: yes
   command: sh -c "sudo gitlab-runner install --user=deployer --working-directory=/home/deployer"
+  when: not runner_check.stat.exists
+  tags:
+    - install.runner
 
 - name: start runner
   become: yes
   service:
     name: gitlab-runner
     state: started
+  tags:
+    - start.runner
 
+- name: check status
+  become: yes
+  command: sh -c "gitlab-runner status"
+  register: command_result
+  tags:
+    - check.status
 
+- name: result command
+  debug:
+    var: command_result.stdout 
+  tags:
+    - check.status
 
 
 
