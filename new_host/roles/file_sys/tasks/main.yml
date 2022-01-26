@@ -1,0 +1,68 @@
+---
+
+    - name: Create a ext4 filesystem on /dev/vdb
+      become: yes
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/vdb
+ 
+    - name: Add a note
+      become: yes
+      command: sh -c "echo '/dev/vdb /mnt/storage ext4 defaults 0 0' >> /etc/fstab" 
+      
+    - name: Mount
+      become: yes1
+      command: sh -c "mount -a"
+      args:
+        warn: no
+    
+    block:
+      - name: "Checking folders"
+        stat:
+         path: "{{item}}"
+        register: folder_stats
+        with_items:
+        - ["/mnt/storage","/mnt/storage/services","/mnt/storage/logs","/mnt/storage/db","/mnt/storage/docker"]
+      - name: "Creating multiple folders without disturbing previous permissions"
+        become: yes 
+         file:
+         path: "{{item.item}}"
+         state: directory
+         mode: 0755
+         group: root
+         owner: root
+         when: item.stat.exists == false
+         loop:
+          - "{{folder_stats.results}}"
+
+    - name: Create deployer user
+      become: yes
+      user:
+        name: deployer
+        password: deployer
+        groups: docker, sudo
+        state: present
+        shell: /bin/bash
+        system: no
+        createhome: yes
+        home: /home/deployer
+    
+    - name: Changing privelegy
+      command:  sh -c "sudo chown -R deployer:deployer /mnt/storage"
+      become: yes
+
+    - name: Create symlinks
+      file:
+       src: "/mnt/storage/{{ item.src }}"
+       dest: "/home/deployer/{{ item.dest }}"
+       state: link
+       force: yes
+      with_items:
+       - { src: 'services', dest: 'services' }
+       - { src: 'logs', dest: 'logs' }
+       - { src: 'db', dest: 'db' }
+       - { src: 'docker', dest: 'docker' }
+    
+           
+
+

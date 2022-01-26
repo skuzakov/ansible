@@ -1,0 +1,24 @@
+---
+
+- name: Get package
+  become: yes
+  get_url:
+    url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64"
+    dest: /usr/local/bin/gitlab-runner
+    mode: 0744
+
+- name: install runner
+  become: yes
+  command: sh -c "sudo gitlab-runner install --user=deployer --working-directory=/home/deployer"
+
+- name: start runner
+  become: yes
+  service:
+    name: gitlab-runner
+    state: started
+
+
+
+
+
+

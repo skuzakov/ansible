@@ -1,0 +1,10 @@
+---
+
+- name: create new host
+  hosts: all
+  gather_facts: false
+  roles:
+    - file_sys
+    - add_swap
+    - add_runner
+    - install_docker
