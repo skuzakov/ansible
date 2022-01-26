@@ -4,7 +4,8 @@
   hosts: all
   gather_facts: false
   roles:
-#    - file_sys
-#    - add_swap
+    - file_sys
+    - add_swap
     - add_runner
-#    - install_docker
+    - install_docker
+    - install_nvm
