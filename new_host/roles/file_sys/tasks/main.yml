@@ -45,7 +45,7 @@
   user:
     name: deployer
     password: $1$yIwXTwLC$wRAV/wBPA27eqmL2FI4EZ/
-    groups: docker,sudo,deployer
+    groups: sudo,deployer
     state: present
     shell: /bin/bash
     system: no
